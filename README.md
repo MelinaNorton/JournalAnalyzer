@@ -117,7 +117,3 @@ project/
 Feel free to open issues or pull requests for additional features, bug fixes, or enhancements.
 
 ---
-
-## License
-
-This project is licensed under the MIT License. See `LICENSE` for details.
