@@ -2,8 +2,15 @@ import click
 from .core import do_vet_journals
 from .config import load_config
 from pathlib import Path
+import shutil
 
 #This file defines how the user can interact with the CLI
+
+def clear_resources(resources_dir: Path):
+    if not resources_dir.exists():
+        return
+    for item in resources_dir.iterdir():
+        item.unlink()
 
 #Specifically, the user can override the yaml's impact-factor, cell-line, research-field, modeling type & 
 #provide their pdf files for parsing & analysis
@@ -34,6 +41,7 @@ def main(config_path="config.yaml", field=None, impact_factor=None, cell_line=No
     print("Reading from resources at:", resources_path)
 
 #download provided pdfs from filepaths (NO URLs)
+    clear_resources(resources_path)
     for src in download:
         src_path = Path(src).expanduser().resolve()
         if not src_path.is_file():

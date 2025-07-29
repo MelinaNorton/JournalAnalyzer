@@ -1,119 +1,94 @@
 # Journal Vetting Assistant
 
-This Python application helps research labs process and evaluate academic journals. It:
-
-* **Reads** PDF files from a `resources/` folder
-* **Summarizes** each journal to reduce verbosity
-* **Splits** text into chunks for embedding
-* **Prompts** a language model (via LangChain) to recommend journals based on user-defined criteria
-
-> **Note:** Only PDF files are supported. Place your PDFs into the `project/resources/` directory before running.
-
----
+A CLI tool and Python library for vetting scientific journals via LLM-based summaries and scoring.
 
 ## Features
 
-* Extract raw text from PDFs using PyMuPDF
-* Interactive metadata template creation via console prompts
-* Text splitting into \~50-token chunks using LangChain's `TokenTextSplitter`
-* Summarization of each journal to keep prompts concise
-* Querying an OpenAI Chat model (GPT-4.1) through LangChain to recommend journals
-
----
-
-## Prerequisites
-
-* Python 3.8 or newer
-* A valid OpenAI API key
-
----
+- **PDF ingestion**: Read and process local PDF files.  
+- **Config-driven**: Central YAML config merges with CLI overrides.  
+- **LLM summaries**: Condense full-text into focused summaries (methods, data, etc.).  
+- **Fit scoring**: Assign a 0–10 score against user-defined criteria.  
+- **Single recommendation**: Outputs “Recommended Journal: …” with rationale.  
+- **Clean workspace**: Auto-clears your `resources/` folder each run.  
 
 ## Installation
 
-1. **Clone this repository**
-
-   ```bash
-   git clone <repo-url>
-   cd <repo-folder>
-   ```
-
-2. **Create a virtual environment** (optional but recommended)
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate   # on Windows: venv\\Scripts\\activate
-   ```
-
-3. **Install dependencies**
-
-   ```bash
-   pip install langchain openai python-dotenv pymupdf
-   ```
-
----
-
-## Configuration
-
-1. **Environment Variables**
-
-   Create a `.env` file at the project root (adjacent to your script) with:
-
-   ```text
-   OPENAI_API_KEY=your_openai_api_key_here
-   ```
-
-2. **Resource Folder**
-
-   Place all your journal PDF files in:
-
-   ```
-   ```
-
-project/project/resources/
-
-````
-   The script will automatically load every `.pdf` found there.
-
----
-
-## Usage
-
-Run the main script:
+```bash
+pip install journal-vetter
+```
+## Or for local development:
 
 ```bash
-python run_journal_vetting.py
-````
-
-1. The app will **read** all PDFs in `resources/`.
-2. It will **summarize** each journal.
-3. You’ll be prompted to **define metadata keys and values** (e.g., `field: computational modeling`, `impact_factor: >5`).
-4. Finally, the app will **query GPT-4.1** to recommend the best-fit journal(s) and print the result.
-
----
-
-## Project Structure
-
-```
-project/
-├── resources/       # Place your .pdf journal files here
-├── run_journal_vetting.py  # Main application script
-├── requirements.txt # (Optional) dependencies list
-├── .env             # OpenAI API key
-└── README.md        # This file
+git clone https://github.com/YourName/JournalAnalyzer.git
+cd JournalAnalyzer
+pip install -e .
 ```
 
----
+## Quickstart
 
-## Customization
+   - **Prepare your config (config.yaml at repo root):**
+   ```
+      criteria:
+         field: "cancer research"
+         impact_factor: ">5"
+         cell_line: "MCF10A"
+         model_type: "Mechanistic"
 
-* **Chunk size**: Adjust `chunk_size` and `chunk_overlap` in `createembeddings()`.
-* **Model settings**: Modify `model_name`, `temperature`, and `max_tokens` in the `ChatOpenAI` constructor.
-* **Prompt templates**: Tweak the wording in `buildquery()` or `compressjournals()` to fit your vetting criteria.
+      model:
+         name: gpt-4.1
+         temperature: 0.0
+         max_tokens: 512
 
----
+      paths:
+         resources_dir: resources
+         output_file:  output/recommendations.txt
 
-## Contributing
+      - **Run the CLI with one or more PDFs**
+   ```
 
-Feel free to open issues or pull requests for additional features, bug fixes, or enhancements.
+   ## Example CLI usage (2 journals)
+   
+   ```journal-vetter \
+   --config config.yaml \
+   --download "/path/to/JournalA.pdf" \
+   --download "/path/to/JournalB.pdf" \
+   --field "oncology"
+  ```
 
----
+  ## Library Usage
+
+```
+   from journalvetter import load_config, do_vet_journals
+   from pathlib import Path
+
+   cfg = load_config("config.yaml")
+   root = Path(".")
+
+   do_vet_journals(
+   cfg,
+   root / "config.yaml",
+   root / "resources",
+   root / "output/recommendations.txt",
+   field="oncology",
+   impact_factor=">5",
+   cell_line="MCF10A",
+   model_type="Mechanistic",
+   )
+```
+
+## CLI Options
+
+Usage: journal-vetter [OPTIONS]
+
+```
+Options:
+   --config TEXT           Path to YAML config file (default: config.yaml)
+   --download PATH         Path to local PDF (repeatable)
+   --field TEXT            Override research field
+   --impact-factor TEXT    Override impact-factor criteria
+   --cell-line TEXT        Override cell-line criteria
+   --model-type TEXT       Override model-type criteria
+   --help                  Show this message and exit.
+```
+
+

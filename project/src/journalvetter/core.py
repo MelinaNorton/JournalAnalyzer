@@ -63,16 +63,23 @@ def buildquery()->PromptTemplate:
     prompt = PromptTemplate(
         input_variables=["template", "journalcontexts"],
         template="""
-            Reserach labs that deal with computational modeling often have to match journals particularly in order to ensure
-            the integrity of their product. Knowing this, analyze the data from the provided journals and, based on the reseracher's
-            desired attributes, choose a journal that is most likley to be worth reading/pursuing in the vetting process. Make sure to 
-            clearly identify the most-fit journal, and concisely explain at the end of your report your reasoning
+            You are a research librarian assistant.  You will be given:
 
-            Desired attributes:
-            {template}
+            1. Desired attributes (as JSON):  
+                {template}
 
-            Journal content:
-            {journalcontexts}
+            2. A series of journal summaries, each prefixed by its filename:  
+                {journalcontexts}
+
+            TASK:
+            - For each journal, give a one-sentence “Fit Score” (0–10) based on how well it matches the attributes.  
+            - Then list pros and cons in bullets.  
+            - Finally, in a line that starts exactly **“Recommended Journal: ”**, name the single journal with the highest Fit Score and give a 2-sentence rationale.
+
+            Your final answer _must_ end with exactly:
+
+            Recommended Journal: <Journal's Main Author Name & Article Title>
+            Rationale: <Your concise reasoning.>
         """
     )
     return prompt
@@ -97,14 +104,25 @@ def compressjournals(filedatas:List[str], llm)->List[str]:
     prompt = PromptTemplate(
         input_variables=["journalcontext"],
         template="""
-            Reserach labs that deal with computational modeling often have to match journals particularly in order to ensure
-            the integrity of their product. Knowing this, analyze the data from the provided journals and, based on the reseracher's
-            desired attributes, choose a journal that is most likley to be worth reading/pursuing in the vetting process. Before I later 
-            send a query with all the journals, return a summary of this journal's full text that cuts out unecessary information/
-            verbosity so as to not overwhelm the LLM with tokens. Make sure to include the journal name/author for identification
+            You are an expert at condensing scientific papers.  
 
-            Journal content:
-            {journalcontext}
+            TASK:  
+            Given the full extracted text below, produce a **single concise summary** that contains **only** the following elements:
+
+            - **Title** (if available)  
+            - **Authors** (if available)  
+            - **Publication Year** (if available)  
+            - **Research Field**  
+            - **Methods** (briefly describe experimental or computational approaches)  
+            - **Data** (type, size, source)  
+
+            Also search and find the associated journal's impact factor & include the Journal's title in the same manner as above
+            
+            DO NOT include anything else—no background, no discussion points, no bullet lists of pros/cons, no extra commentary.  
+            Return exactly those items, labeled, in plain text.
+
+            ——————————————  
+            Text to summarize:  {journalcontext}
         """
     )
     for file in filedatas:
