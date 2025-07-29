@@ -1,0 +1,14 @@
+criteria:
+  field: "cancer research"
+  impact_factor: ">5"
+  cell_line: "MCF10A"
+  mode-type: "Mechanistic"
+
+model:
+  name: gpt-4.1
+  temperature: 0.0
+  max_tokens: 512
+
+paths:
+  resources_dir: resources
+  output_file: output/recommendations.txt

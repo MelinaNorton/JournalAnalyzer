@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "journal-vetter"
+version = "0.1.0"
+description = "Vetting journals via LLM"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Melina Norton", email = "linamelina0707@gmail.com" }]
+requires-python = ">=3.7"
+dependencies = [
+  "click>=8.0.0",
+  "langchain",
+]
+
+[project.scripts]
+journal-vetter = "journalvetter.cli:run"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

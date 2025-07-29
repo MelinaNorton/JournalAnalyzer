@@ -1,0 +1,8 @@
+pyproject.toml
+setup.py
+journal_vetter.egg-info/PKG-INFO
+journal_vetter.egg-info/SOURCES.txt
+journal_vetter.egg-info/dependency_links.txt
+journal_vetter.egg-info/entry_points.txt
+journal_vetter.egg-info/requires.txt
+journal_vetter.egg-info/top_level.txt

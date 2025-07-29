@@ -1,22 +1,16 @@
 from langchain.schema import Document
 from typing import List, Dict
 import fitz
-import re 
 import json
 from pathlib import Path
 from langchain.text_splitter import TokenTextSplitter
-import os
 from langchain.chat_models import ChatOpenAI
 from langchain import LLMChain
 from dotenv import load_dotenv, find_dotenv
 from langchain.prompts import PromptTemplate
-load_dotenv()
+from .config import load_config
 
-llm = ChatOpenAI(
-        model_name="gpt-4.1",     
-        temperature=0.0,        
-        max_tokens=512,         
-    )
+load_dotenv()
 
 #function that recieved a journal's PDF and extracts the raw text into a varible & returns it
 def readpdf(path:str)->str:
@@ -71,7 +65,8 @@ def buildquery()->PromptTemplate:
         template="""
             Reserach labs that deal with computational modeling often have to match journals particularly in order to ensure
             the integrity of their product. Knowing this, analyze the data from the provided journals and, based on the reseracher's
-            desired attributes, choose a journal that is most likley to be worth reading/pursuing in the vetting process.
+            desired attributes, choose a journal that is most likley to be worth reading/pursuing in the vetting process. Make sure to 
+            clearly identify the most-fit journal, and concisely explain at the end of your report your reasoning
 
             Desired attributes:
             {template}
@@ -83,8 +78,9 @@ def buildquery()->PromptTemplate:
     return prompt
 
 
-
-def queryLLM(prompt:PromptTemplate, templatestr:str, journalcontexts:List[List[str]])->str:
+#query the llm using our yaml-defined template-string & the prompt, as well as the condensed journal-data
+#collected from compressjournals
+def queryLLM(prompt:PromptTemplate, templatestr:str, journalcontexts:List[List[str]], llm)->str:
     journal_context_str = "\n\n".join(chunk for journal in journalcontexts for chunk in journal)
     chain = LLMChain(llm=llm, prompt=prompt)
     answer = chain.run(
@@ -92,7 +88,10 @@ def queryLLM(prompt:PromptTemplate, templatestr:str, journalcontexts:List[List[s
         journalcontexts = journal_context_str
     )
     return answer
-def compressjournals(filedatas:List[str])->List[str]:
+
+#iterate through the downloaded text from the provoded journal-pdfs & get thoughtfully-condensed summaries
+#that will be used later on for the llm's final reasoning/analysis
+def compressjournals(filedatas:List[str], llm)->List[str]:
     summarized_journals: List[str] = []
 
     prompt = PromptTemplate(
@@ -117,18 +116,33 @@ def compressjournals(filedatas:List[str])->List[str]:
         summarized_journals.append(answer)
     return summarized_journals
 
+#"main" file for the program; replace yaml fields as needed, instantiale llm object & call appropriate functions
+#in-order
+def do_vet_journals(cfg, config_file_path, resources_path, output_file, field, impact_factor, cell_line, model_type):
+    if field:
+        cfg["criteria"]["field"] = field
+    if impact_factor:
+        cfg["criteria"]["impact_factor"] = impact_factor
+    if cell_line:
+        cfg["criteria"]["cell_line"] = cell_line
+    if model_type:
+        cfg["criteria"]["model_type"] = model_type
 
-here = Path(__file__).resolve().parent
-project_root = here.parents[1]   
-resources_path = project_root / "project" / "resources"
-filedatas = aggregatedata(resources_path)
-summarized_files = compressjournals(filedatas)
-tokenizedjournals = createembeddings(summarized_files)
-template = gettemplate()
-templatestr = json.dumps(template, indent=2)
-prompt = buildquery()
-answer = queryLLM(prompt, templatestr, tokenizedjournals)
-print(answer)
+    llm = ChatOpenAI(
+        model_name=cfg['model']['name'],     
+        temperature=0.0,        
+        max_tokens=512,         
+    )
 
+    filedatas = aggregatedata(resources_path)
+    summarized_files = compressjournals(filedatas, llm)
+    tokenizedjournals = createembeddings(summarized_files)
+    templatestr = json.dumps(cfg["criteria"], indent=2)
+    prompt = buildquery()
+    answer = queryLLM(prompt, templatestr, tokenizedjournals, llm)
 
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text(answer, encoding="utf-8")
+    print(f"✅ Results saved to {output_file}")
 
+    print(answer)
