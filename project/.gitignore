@@ -1,0 +1,3 @@
+# Ignore dotenv files
+.env
+.env.*      # optionally ignore .env.local, .env.development, etc.
