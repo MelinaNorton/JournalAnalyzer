@@ -25,14 +25,12 @@ def clear_resources(resources_dir: Path):
     multiple=True,
     help="local path of a PDF to fetch into the resources directory"
 )
-
-#entrypoint -> our main function
 def run(config, field, impact_factor, cell_line, model_type, download):
     """Run the Journal Vetting pipeline."""
-    main(config, field, impact_factor, cell_line, model_type, download)
+    main(config, field, impact_factor, cell_line, model_type, download, mode="cli")
 
 #load our config file & populate necessary paths (resources & output)
-def main(config_path="config.yaml", field=None, impact_factor=None, cell_line=None, model_type=None, download=None):
+def main(config_path="config.yaml", field=None, impact_factor=None, cell_line=None, model_type=None, download=None, mode="library"):
     cfg = load_config()
     config_file_path = Path(config_path).resolve()
     config_dir = config_file_path.parent
@@ -59,5 +57,9 @@ def main(config_path="config.yaml", field=None, impact_factor=None, cell_line=No
         field,
         impact_factor,
         cell_line,
-        model_type
+        model_type,
+        mode
     )
+
+if __name__ == "__main__":
+    run()

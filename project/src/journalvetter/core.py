@@ -59,29 +59,48 @@ def createembeddings(journaldatas:List[str])->List[List[str]]:
         tokenized_journals.append(currtokens)
     return tokenized_journals
 
-def buildquery()->PromptTemplate:
-    prompt = PromptTemplate(
-        input_variables=["template", "journalcontexts"],
-        template="""
-            You are a research librarian assistant.  You will be given:
+def buildquery(mode)->PromptTemplate:
+    if(mode=='cli'):
+        prompt = PromptTemplate(
+            input_variables=["template", "journalcontexts"],
+            template="""
+                You are a research librarian assistant.  You will be given:
 
-            1. Desired attributes (as JSON):  
+                1. Desired attributes (as JSON):  
+                    {template}
+
+                2. A series of journal summaries, each prefixed by its filename:  
+                    {journalcontexts}
+
+                TASK:
+                - For each journal, give a one-sentence “Fit Score” (0–10) based on how well it matches the attributes.  
+                - Then list pros and cons in bullets.  
+                - Finally, in a line that starts exactly **“Recommended Journal: ”**, name the single journal with the highest Fit Score and give a 2-sentence rationale.
+
+                Your final answer _must_ end with exactly:
+
+                Recommended Journal: <Journal's Main Author Name & Article Title>
+                Rationale: <Your concise reasoning.>
+            """
+        )
+    if(mode == "library"):
+        prompt = PromptTemplate(
+            input_variables=["template", "journalcontexts"],
+            template="""
+                You are a research librarian assistant. You will be given:
+
+                1. Desired attributes (as JSON):  
                 {template}
 
-            2. A series of journal summaries, each prefixed by its filename:  
+                2. A series of journal summaries, each prefixed by its filename:  
                 {journalcontexts}
 
-            TASK:
-            - For each journal, give a one-sentence “Fit Score” (0–10) based on how well it matches the attributes.  
-            - Then list pros and cons in bullets.  
-            - Finally, in a line that starts exactly **“Recommended Journal: ”**, name the single journal with the highest Fit Score and give a 2-sentence rationale.
+                TASK:
+                - Identify the single journal article that best matches the desired attributes.
+                - Return **only** that article’s title as a plain string, with no additional text, bullets, or commentary.
 
-            Your final answer _must_ end with exactly:
-
-            Recommended Journal: <Journal's Main Author Name & Article Title>
-            Rationale: <Your concise reasoning.>
-        """
-    )
+            """
+        )
     return prompt
 
 
@@ -117,7 +136,7 @@ def compressjournals(filedatas:List[str], llm)->List[str]:
             - **Data** (type, size, source)  
 
             Also search and find the associated journal's impact factor & include the Journal's title in the same manner as above
-            
+
             DO NOT include anything else—no background, no discussion points, no bullet lists of pros/cons, no extra commentary.  
             Return exactly those items, labeled, in plain text.
 
@@ -136,7 +155,7 @@ def compressjournals(filedatas:List[str], llm)->List[str]:
 
 #"main" file for the program; replace yaml fields as needed, instantiale llm object & call appropriate functions
 #in-order
-def do_vet_journals(cfg, config_file_path, resources_path, output_file, field, impact_factor, cell_line, model_type):
+def do_vet_journals(cfg, config_file_path, resources_path, output_file, field, impact_factor, cell_line, model_type, mode):
     if field:
         cfg["criteria"]["field"] = field
     if impact_factor:
@@ -156,11 +175,13 @@ def do_vet_journals(cfg, config_file_path, resources_path, output_file, field, i
     summarized_files = compressjournals(filedatas, llm)
     tokenizedjournals = createembeddings(summarized_files)
     templatestr = json.dumps(cfg["criteria"], indent=2)
-    prompt = buildquery()
+    prompt = buildquery(mode)
     answer = queryLLM(prompt, templatestr, tokenizedjournals, llm)
 
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    output_file.write_text(answer, encoding="utf-8")
-    print(f"✅ Results saved to {output_file}")
-
-    print(answer)
+    if(mode=="cli"):
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(answer, encoding="utf-8")
+        print(f"Results saved to {output_file}")
+        print(answer)
+    
+    return answer

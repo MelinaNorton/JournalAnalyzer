@@ -1,5 +1,4 @@
 pyproject.toml
-setup.py
 src/journal_vetter.egg-info/PKG-INFO
 src/journal_vetter.egg-info/SOURCES.txt
 src/journal_vetter.egg-info/dependency_links.txt

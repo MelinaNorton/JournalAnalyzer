@@ -5,8 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "journal-vetter"
 version = "0.1.0"
-description = "uses tokenized & carefully summarized journals to query an LLM for analysis, based also on user-
-defined YAML attributes"
+description = "uses tokenized & carefully summarized journals to query an LLM for analysis, based also on user-defined YAML attributes"
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "Melina Norton", email = "linamelina0707@gmail.com" }]
