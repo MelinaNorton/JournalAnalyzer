@@ -17,10 +17,10 @@ dependencies = [
   "python-dotenv>=0.21.0",
   "openai>=0.27.0",
 ]
-urls = { 
-    Homepage = "https://github.com/MelinaNorton/journal-vetter",
-    Documentation = "https://github.com/MelinaNorton/journal-vetter#readme"
-}
+
+[project.urls]
+Homepage = "https://github.com/MelinaNorton/journal-vetter"
+Documentation = "https://github.com/MelinaNorton/journal-vetter#readme"
 
 [project.scripts]
 journal-vetter = "journalvetter.cli:run"
