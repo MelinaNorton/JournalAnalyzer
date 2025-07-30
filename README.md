@@ -8,7 +8,7 @@ A CLI tool and Python library for vetting scientific journals via LLM-based summ
 - **Config-driven**: Central YAML config merges with CLI overrides.  
 - **LLM summaries**: Condense full-text into focused summaries (methods, data, etc.).  
 - **Fit scoring**: Assign a 0–10 score against user-defined criteria.  
-- **Single recommendation**: Outputs “Recommended Journal: …” with rationale.  
+- **Single recommendation**: Outputs “Recommended Journal: …” with rationale (CLI) or a single title (Library).  
 - **Clean workspace**: Auto-clears your `resources/` folder each run.  
 
 ## Installation
