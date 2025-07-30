@@ -8,7 +8,6 @@ version = "1.0.1"
 license = { text = "MIT" }
 description = "uses tokenized & carefully summarized journals to query an LLM for analysis, based also on user-defined YAML attributes"
 readme = "README.md"
-license = { file = "LICENSE" }
 authors = [{ name = "Melina Norton", email = "linamelina0707@gmail.com" }]
 requires-python = ">=3.7"
 dependencies = [
