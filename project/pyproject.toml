@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "journal-vetter"
-version = "0.1.0"
+version = "1.0.1"
+license = { text = "MIT" }
 description = "uses tokenized & carefully summarized journals to query an LLM for analysis, based also on user-defined YAML attributes"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -17,6 +18,10 @@ dependencies = [
   "python-dotenv>=0.21.0",
   "openai>=0.27.0",
 ]
+urls = { 
+    "Homepage" = "https://github.com/MelinaNorton/journal-vetter",
+    "Documentation" = "https://github.com/MelinaNorton/journal-vetter#readme",
+}
 
 [project.scripts]
 journal-vetter = "journalvetter.cli:run"
