@@ -90,5 +90,11 @@ Options:
    --model-type TEXT       Override model-type criteria
    --help                  Show this message and exit.
 ```
+---
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
 
 
